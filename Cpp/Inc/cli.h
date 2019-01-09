@@ -8,15 +8,16 @@
 
 class _FS {
 	public:	
-	static	FATFS fatfs;
-	static	DIR		dir;			
-	static	TCHAR lfn[_MAX_LFN + 1];
-	static	FILINFO	fno;
+		FATFS fatfs;
+		DIR		dir;			
+		TCHAR lfn[_MAX_LFN + 1];
+		TCHAR cwd[_MAX_LFN + 1];
+		FILINFO	fno;
 	
 	_FS() {
-			if(f_getcwd(lfn,_MAX_LFN) != FR_OK) {
+			if(f_getcwd(cwd,_MAX_LFN) != FR_OK) {
 				f_mount(&fatfs,"0:",1);
-				f_opendir(&dir,"/");
+				f_getcwd(cwd,_MAX_LFN);
 			}
 	}
 };

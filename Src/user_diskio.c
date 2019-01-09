@@ -158,7 +158,7 @@ int		c0=0,c1=0;
 * Return				: percentage of number of sectors reduced
 *******************************************************************************/
 FRESULT	ff_format(char *drv) {
-			FATFS f;
+//			FATFS f;
 			FRESULT err;
 			uint8_t	*wbuf;
 //	Watchdog_init(4000);

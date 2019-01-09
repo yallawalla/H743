@@ -7,10 +7,6 @@ void	makeHost(void),
 			killMsc(void),
 			killVcp(void);
 }
-FATFS		_FS::fatfs;
-DIR			_FS::dir;			
-TCHAR		_FS::lfn[_MAX_LFN + 1];
-FILINFO	_FS::fno;
 extern "C" {
 FRESULT	ff_format(char *);
 int			ff_pack(int);
@@ -18,7 +14,7 @@ int			ff_pack(int);
 //_________________________________________________________________________________
 void	_CLI::Newline(void) {
 		_print("\r\n");
-		if(f_getcwd(lfn,_MAX_LFN)==FR_OK && f_opendir(&dir,lfn)==FR_OK) {
+		if(f_getcwd(lfn,_MAX_LFN)==FR_OK) {
 			if(lfn[strlen(lfn)-1]=='/')
 				_print("%s",lfn);
 					else
@@ -28,6 +24,7 @@ void	_CLI::Newline(void) {
 }
 //_________________________________________________________________________________
 int _CLI::Fkey(int t) {
+		f_chdir(cwd);
 		switch(t) {
 			case __CtrlE:
 			break;
@@ -141,8 +138,6 @@ FRESULT _CLI::Decode(char *p) {
 			return err;
 		if(FRESULT err=f_getcwd(lfn,_MAX_LFN))
 			return err;
-		if(FRESULT err=f_opendir(&dir,lfn))
-			return err;
 	}
 //__change directory_______________________________________________________________
 	else 
@@ -150,8 +145,12 @@ FRESULT _CLI::Decode(char *p) {
 	if(!strncmp("cdir",sc[0],len)) {
 		if(n < 2)
 			return FR_NO_FILE;
+		for(int i=1; i<n-1; ++i) {
+			*strchr(sc[i],0)=' ';
+		}
 		if(FRESULT err=f_chdir(sc[1]))
 			return err;
+		f_getcwd(cwd,_MAX_LFN);
 	}
 //_________________________________________________________________________________
 	else if(!strncmp("eject",sc[0],len)) {
@@ -185,8 +184,6 @@ FRESULT _CLI::Decode(char *p) {
 		if(FRESULT err=f_findfirst(&dir,&fno,lfn,sc[1]))
 			return err;	
 		do {
-//			if (fno.fattrib & AM_DIR)
-//				continue;
 			if(FRESULT err=f_unlink(fno.fname))
 				return err;	
 			if(FRESULT err=f_findnext(&dir,&fno))
