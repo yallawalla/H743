@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2018 STMicroelectronics International N.V. 
+  * Copyright (c) 2019 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -139,7 +139,7 @@ uint8_t UserTxBufferFS[APP_TX_DATA_SIZE];
   * @{
   */
 
-extern USBD_HandleTypeDef hvcpDeviceFS;
+extern USBD_HandleTypeDef hVcpDeviceFS;
 
 /* USER CODE BEGIN EXPORTED_VARIABLES */
 _io	*_VCP=NULL;
@@ -184,8 +184,8 @@ static int8_t CDC_Init_FS(void)
 {
   /* USER CODE BEGIN 3 */
   /* Set Application Buffers */
-  USBD_CDC_SetTxBuffer(&hvcpDeviceFS, UserTxBufferFS, 0);
-  USBD_CDC_SetRxBuffer(&hvcpDeviceFS, UserRxBufferFS);
+  USBD_CDC_SetTxBuffer(&hVcpDeviceFS, UserTxBufferFS, 0);
+  USBD_CDC_SetRxBuffer(&hVcpDeviceFS, UserRxBufferFS);
 	_VCP=_io_init(__RXLEN,__TXLEN);
   return (USBD_OK);
   /* USER CODE END 3 */
@@ -293,8 +293,8 @@ static int8_t CDC_Control_FS(uint8_t cmd, uint8_t* pbuf, uint16_t length)
 static int8_t CDC_Receive_FS(uint8_t* Buf, uint32_t *Len)
 {
   /* USER CODE BEGIN 6 */
-  USBD_CDC_SetRxBuffer(&hvcpDeviceFS, &Buf[0]);
-  USBD_CDC_ReceivePacket(&hvcpDeviceFS);
+  USBD_CDC_SetRxBuffer(&hVcpDeviceFS, &Buf[0]);
+  USBD_CDC_ReceivePacket(&hVcpDeviceFS);
 	if(_VCP)
 		_buffer_push(_VCP->rx,Buf,*Len);
   return (USBD_OK);
@@ -316,12 +316,12 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
 {
   uint8_t result = USBD_OK;
   /* USER CODE BEGIN 7 */
-  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hvcpDeviceFS.pClassData;
+  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hVcpDeviceFS.pClassData;
   if (hcdc->TxState != 0){
     return USBD_BUSY;
   }
-  USBD_CDC_SetTxBuffer(&hvcpDeviceFS, Buf, Len);
-  result = USBD_CDC_TransmitPacket(&hvcpDeviceFS);
+  USBD_CDC_SetTxBuffer(&hVcpDeviceFS, Buf, Len);
+  result = USBD_CDC_TransmitPacket(&hVcpDeviceFS);
   /* USER CODE END 7 */
   return result;
 }
@@ -335,7 +335,7 @@ uint8_t CDC_Transmit_FS(uint8_t* Buf, uint16_t Len)
 *******************************************************************************/
 void	*CDC_Poll_FS(void *v) {
 	*(_io **)v=_VCP;
-  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hvcpDeviceFS.pClassData;
+  USBD_CDC_HandleTypeDef *hcdc = (USBD_CDC_HandleTypeDef*)hVcpDeviceFS.pClassData;
 	if(_VCP && hcdc->TxState ==  0) {
 		int len=_buffer_pull(_VCP->tx, UserTxBufferFS, CDC_DATA_FS_IN_PACKET_SIZE);
 		if(len)

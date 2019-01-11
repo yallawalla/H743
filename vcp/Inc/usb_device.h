@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2018 STMicroelectronics International N.V. 
+  * Copyright (c) 2019 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -88,7 +88,7 @@
   */
 
 /** USB Device initialization function. */
-void vcp_USB_DEVICE_Init(void);
+void Vcp_USB_DEVICE_Init(void);
 
 /**
   * @}

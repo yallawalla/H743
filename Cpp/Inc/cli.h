@@ -15,10 +15,10 @@ class _FS {
 		FILINFO	fno;
 	
 	_FS() {
-			if(f_getcwd(cwd,_MAX_LFN) != FR_OK) {
-				f_mount(&fatfs,"0:",1);
-				f_getcwd(cwd,_MAX_LFN);
-			}
+		if(f_getcwd(cwd,_MAX_LFN) != FR_OK) {
+			f_mount(&fatfs,"0:",0);
+			f_getcwd(cwd,_MAX_LFN);
+		}
 	}
 };
 //_________________________________________________________________________________
@@ -28,7 +28,6 @@ class _CLI : public _TERM, public _FS {
 										DecodeMinus(char *),
 										DecodeInq(char *),
 										DecodeEq(char *);	
-		char *trim(char **c);
 		void	date_time(uint32_t,uint32_t);
 
 	public:	
@@ -40,7 +39,6 @@ class _CLI : public _TERM, public _FS {
 		static void			parseTask(_CLI *me) {
 			me->Parse(me->io);
 		}
-
 
 		static void	pollUsart(_io *io) {
 			UART_HandleTypeDef *h=(UART_HandleTypeDef *)io->huart;
@@ -59,7 +57,6 @@ class _CLI : public _TERM, public _FS {
 				}
 			}
 
-
 		_io* ioUsart(UART_HandleTypeDef *huart, int sizeRx, int sizeTx) {
 			_io* io=_io_init(sizeRx,sizeTx);
 			if(io && huart) {
@@ -69,7 +66,6 @@ class _CLI : public _TERM, public _FS {
 			}
 			return io;
 		}
-		
 		
 		_CLI() {
 			io=ioUsart(NULL,__RXLEN,__TXLEN);

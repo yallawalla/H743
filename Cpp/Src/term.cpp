@@ -98,16 +98,43 @@ int		i=getchar();
 			return EOF;
 }
 //______________________________________________________________________________________
-void	*_TERM::Parse(_io *io) {
-_io		*temp=_stdio(io);
-void	*v=Parse();
-			_stdio(temp);
-			return v;
-}
-//______________________________________________________________________________________
 void	*_TERM::Parse(FIL *f) {
 _io		*temp=_stdio(NULL);
 void	*v=Parse(fgetc((FILE *)f));
+			_stdio(temp);
+			return v;
+}/*******************************************************************************
+* Function Name	:
+* Description		:
+* Output				: @vlp 300
+* Return				:
+*******************************************************************************/
+FRESULT _TERM::Batch(char *filename) {
+			char *par=strchr(filename,' ');
+			par=trim(&par);
+			FIL *f=new FIL;
+			FRESULT ret=f_open(f,filename,FA_READ);
+			if(ret==FR_OK) {
+//				_io		*temp=_stdio(NULL);
+				while(!f_eof(f)) {
+					int i=fgetc((FILE *)f);
+					if(i=='#' && par && *par) {
+						while(*par && *par != ' ')
+							Parse(*par++);
+						while(*par && *par == ' ') ++par;
+					} else
+						Parse(i);
+				}
+				f_close(f);	
+//				_stdio(temp);
+			}
+			delete f;
+			return ret;
+}
+//______________________________________________________________________________________
+void	*_TERM::Parse(_io *io) {
+_io		*temp=_stdio(io);
+void	*v=Parse();
 			_stdio(temp);
 			return v;
 }
@@ -144,21 +171,18 @@ void 	*v=this;
 			return v;
 }
 /*******************************************************************************
-* Function Name	:
-* Description		:
+* Function Name	: 
+* Description		: 
 * Output				:
 * Return				:
 *******************************************************************************/
-FRESULT _TERM::Batch(char *filename) {
-			FIL *f=new FIL;
-			FRESULT ret=f_open(f,filename,FA_READ);
-			if(ret==FR_OK) {
-				while(!f_eof(f))
-					Parse(f);
-				f_close(f);	
-			}
-			delete f;
-			return ret;
+char *_TERM::trim(char **c) {
+	char *cc=NULL;
+	if(c && *c) {
+		for(cc=strchr(*c,0); *c != cc && *--cc==' '; *cc=0);
+		for(cc=*c; *cc==' '; *cc++=0);
+	}
+	return cc;
 }
 /*******************************************************************************
 * Function Name : batch

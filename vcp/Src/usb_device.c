@@ -10,7 +10,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2018 STMicroelectronics International N.V. 
+  * Copyright (c) 2019 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -70,7 +70,7 @@
 /* USER CODE END PFP */
 
 /* USB Device Core handle declaration. */
-USBD_HandleTypeDef hvcpDeviceFS;
+USBD_HandleTypeDef hVcpDeviceFS;
 
 /*
  * -- Insert your variables declaration here --
@@ -84,12 +84,12 @@ USBD_HandleTypeDef hvcpDeviceFS;
 /* USER CODE BEGIN 1 */
 void killVcp(void)
 {
-	if(hvcpDeviceFS.pClass)
-		USBD_Stop(&hvcpDeviceFS);
+	if(hVcpDeviceFS.pClass)
+		USBD_Stop(&hVcpDeviceFS);
 }
 
 void makeVcp(void) {
-	vcp_USB_DEVICE_Init();
+	Vcp_USB_DEVICE_Init();
 }
 /* USER CODE END 1 */
 
@@ -97,20 +97,20 @@ void makeVcp(void) {
   * Init USB device Library, add supported class and start the library
   * @retval None
   */
-void vcp_USB_DEVICE_Init(void)
+void Vcp_USB_DEVICE_Init(void)
 {
   /* USER CODE BEGIN USB_DEVICE_Init_PreTreatment */
   
   /* USER CODE END USB_DEVICE_Init_PreTreatment */
   
   /* Init Device Library, add supported class and start the library. */
-  USBD_Init(&hvcpDeviceFS, &FS_Desc, DEVICE_FS);
+  USBD_Init(&hVcpDeviceFS, &FS_Desc, DEVICE_FS);
 
-  USBD_RegisterClass(&hvcpDeviceFS, &USBD_CDC);
+  USBD_RegisterClass(&hVcpDeviceFS, &USBD_CDC);
 
-  USBD_CDC_RegisterInterface(&hvcpDeviceFS, &USBD_Interface_fops_FS);
+  USBD_CDC_RegisterInterface(&hVcpDeviceFS, &USBD_Interface_fops_FS);
 
-  USBD_Start(&hvcpDeviceFS);
+  USBD_Start(&hVcpDeviceFS);
 
   /* USER CODE BEGIN USB_DEVICE_Init_PostTreatment */
   

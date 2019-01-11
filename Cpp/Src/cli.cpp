@@ -20,7 +20,7 @@ void	_CLI::Newline(void) {
 					else
 						_print("%s/",lfn);
 		} else
-		_print("?:/"); 		
+			_print("?:/"); 		
 }
 //_________________________________________________________________________________
 int _CLI::Fkey(int t) {
@@ -109,7 +109,7 @@ FRESULT _CLI::DecodeInq(char *c) {
 FRESULT _CLI::Decode(char *p) {
 	char *sc[]={0,0,0,0,0,0,0,0};
 	int i=0,n=0,len=1;
-	switch(*p) {
+	switch(*trim(&p)) {
 		case '+':
 			return DecodePlus(p);
 		case '-':
@@ -118,6 +118,8 @@ FRESULT _CLI::Decode(char *p) {
 			return DecodeInq(p);
 		case '=':
 			return DecodeEq(p);
+		case '@':
+			return Batch(++p);
 	}		
 	while (p[i]) {
 		while(p[i] && p[i]==' ')
@@ -259,7 +261,7 @@ FRESULT _CLI::Decode(char *p) {
 	}
 //__format flash drive_____________________________________________________________
 	else if(!strncmp("format",sc[0],len)) {
-		FRESULT	err=ff_format(sc[0]);
+		FRESULT	err=ff_format(sc[1]);
 		if(err != FR_OK)
 			return err;
 	}
@@ -345,8 +347,6 @@ FRESULT _CLI::Decode(char *p) {
 			makeVcp();
 		} else
 				return FR_NOT_READY;
-	} else if(!strncmp("@",sc[0],1)) {
-		Batch(++sc[0]);
 	} else {
 		if(n) {
 			for(i=0; i<n; ++i)
@@ -355,22 +355,6 @@ FRESULT _CLI::Decode(char *p) {
 		}
 	}
 	return FR_OK;
-}
-
-/*******************************************************************************
-* Function Name	: 
-* Description		: 
-* Output				:
-* Return				:
-*******************************************************************************/
-char *_CLI::trim(char **c) {
-	if(!c)
-		return NULL;
-	if(*c) {
-		while(**c==' ') ++*c;
-		for(char *cc=strchr(*c,0); *c != cc && *--cc==' '; *cc=0);
-	}
-	return *c;
 }
 /*******************************************************************************
 * Function Name	: 

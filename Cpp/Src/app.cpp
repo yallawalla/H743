@@ -26,7 +26,6 @@ extern void	*CDC_Poll_FS(void *);
 			{} else {}
 			__HAL_RCC_CLEAR_RESET_FLAGS();
 			_print(" reset, CPU %dMHz\r\n/",SystemCoreClock/1000000);
-				
 			_stdio(NULL);
 	}
 }

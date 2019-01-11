@@ -9,7 +9,7 @@
   * inserted by the user or by software development tools
   * are owned by their respective copyright owners.
   *
-  * Copyright (c) 2018 STMicroelectronics International N.V. 
+  * Copyright (c) 2019 STMicroelectronics International N.V. 
   * All rights reserved.
   *
   * Redistribution and use in source and binary forms, with or without 
@@ -64,9 +64,9 @@ FIL USERFile;       /* File object for USER */
 void MX_FATFS_Init(void) 
 {
   /*## FatFS: Link the USBH driver ###########################*/
+  retUSBH = FATFS_LinkDriver(&USBH_Driver, USBHPath);
   /*## FatFS: Link the USER driver ###########################*/
   retUSER = FATFS_LinkDriver(&USER_Driver, USERPath);
-  retUSBH = FATFS_LinkDriver(&USBH_Driver, USBHPath);
 
   /* USER CODE BEGIN Init */
   /* additional user code for init */     

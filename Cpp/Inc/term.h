@@ -53,6 +53,7 @@ static	void	Debug(_dbg, const char *format, ...);
 	char	*Cmd(void);
 	int		Escape(void);
 	void	Repeat(int,int);
+	char *trim(char **);
 	void *Parse(void);
 	void *Parse(int);
 	void *Parse(_io *);
