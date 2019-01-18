@@ -104,7 +104,7 @@ void Vcp_USB_DEVICE_Init(void)
   /* USER CODE END USB_DEVICE_Init_PreTreatment */
   
   /* Init Device Library, add supported class and start the library. */
-  USBD_Init(&hVcpDeviceFS, &FS_Desc, DEVICE_FS);
+  USBD_Init(&hVcpDeviceFS, &VCP_Desc, DEVICE_FS);
 
   USBD_RegisterClass(&hVcpDeviceFS, &USBD_CDC);
 

@@ -15,10 +15,11 @@ class _FS {
 		FILINFO	fno;
 	
 	_FS() {
-		if(f_getcwd(cwd,_MAX_LFN) != FR_OK) {
-			f_mount(&fatfs,"0:",0);
-			f_getcwd(cwd,_MAX_LFN);
+		if(f_mount(&fatfs,"0:",1) != FR_OK || f_chdrive("0:") != FR_OK) {
+			f_mount(&fatfs,"1:",0);
+			f_chdrive("1:");
 		}
+		f_getcwd(cwd,_MAX_LFN);		
 	}
 };
 //_________________________________________________________________________________
@@ -44,18 +45,18 @@ class _CLI : public _TERM, public _FS {
 			UART_HandleTypeDef *h=(UART_HandleTypeDef *)io->huart;
 			int idx=((DMA_Stream_TypeDef   *)h->hdmarx->Instance)->NDTR;
 
-				io->rx->_push = (char *)&h->pRxBuffPtr[h->RxXferSize - idx];	
-				if(h->gState == HAL_UART_STATE_READY) {
-					int len;
-					if(!h->pTxBuffPtr)
-						h->pTxBuffPtr=(uint8_t *)malloc(io->tx->size);
-					do {
-						len=_buffer_pull(io->tx, h->pTxBuffPtr, io->tx->size);
-						if(len)
-							HAL_UART_Transmit_DMA(h, h->pTxBuffPtr, len);
-					} while(len > 0);
-				}
+			io->rx->_push = (char *)&h->pRxBuffPtr[h->RxXferSize - idx];	
+			if(h->gState == HAL_UART_STATE_READY) {
+				int len;
+				if(!h->pTxBuffPtr)
+					h->pTxBuffPtr=(uint8_t *)malloc(io->tx->size);
+				do {
+					len=_buffer_pull(io->tx, h->pTxBuffPtr, io->tx->size);
+					if(len)
+						HAL_UART_Transmit_DMA(h, h->pTxBuffPtr, len);
+				} while(len > 0);
 			}
+		}
 
 		_io* ioUsart(UART_HandleTypeDef *huart, int sizeRx, int sizeTx) {
 			_io* io=_io_init(sizeRx,sizeTx);

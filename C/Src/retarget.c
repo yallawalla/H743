@@ -12,7 +12,9 @@
  *
  * Copyright (c) 2012 Keil - An ARM Company. All rights reserved.
  *----------------------------------------------------------------------------*/
-#include	<stdio.h>
+#include <stdio.h>
+#include <rt_misc.h>
+
 #include "io.h"
 #include "proc.h"
 #include "ff.h"

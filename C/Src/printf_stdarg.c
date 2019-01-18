@@ -321,8 +321,8 @@ int main(void)
 
 #include "ff.h"
 /*******************************************************************************
-* Function Name : batch
-* Description   :	ADP1047 output voltage setup, using the default format
+* Function Name : 
+* Description   :	
 * Input         :
 * Output        :
 * Return        :
@@ -336,8 +336,8 @@ __weak 	int	_print(const char *format, ...) {
 				return(ret);
 }
 /*******************************************************************************
-* Function Name : batch
-* Description   :	ADP1047 output voltage setup, using the default format
+* Function Name : 
+* Description   :	
 * Input         :
 * Output        :
 * Return        :
@@ -347,8 +347,8 @@ int			_printdec(int n, int k) {
 				return(n);
 }
 /*******************************************************************************
-* Function Name : batch
-* Description   :	ADP1047 output voltage setup, using the default format
+* Function Name : 
+* Description   :	
 * Input         :
 * Output        :
 * Return        :
