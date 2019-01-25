@@ -1,5 +1,4 @@
 #include "cli.h"
-
 extern "C" {
 void	makeHost(void),
 			makeMsc(void),
@@ -60,6 +59,8 @@ int _CLI::Fkey(int t) {
 //_________________________________________________________________________________
 //_________________________________________________________________________________
 typedef enum  { _LIST, _ERASE } _FACT;
+//
+//
 //_________________________________________________________________________________
 FRESULT _CLI::DecodePlus(char *c) {
 	switch(*trim(&++c)) {
@@ -89,8 +90,6 @@ FRESULT _CLI::DecodeMinus(char *c) {
 //_________________________________________________________________________________
 FRESULT _CLI::DecodeEq(char *c) {
 	switch(*trim(&++c)) {
-		case 'D':
-			break;
 		default:
 			return FR_INVALID_NAME;
 	}
@@ -99,19 +98,16 @@ FRESULT _CLI::DecodeEq(char *c) {
 //_________________________________________________________________________________
 FRESULT _CLI::DecodeInq(char *c) {
 	switch(*trim(&++c)) {
-		case 'D':
-			break;
 		default:
 			return FR_INVALID_NAME;
 	} 	
 	return FR_OK;
 }
 //_________________________________________________________________________________
-FRESULT _CLI::Decode(char *c) {
-	if(!*c)
-		return FR_OK;
-	char *p=trim(&c);
-	switch(*p) {
+FRESULT _CLI::Decode(char *p) {
+	char *sc[]={0,0,0,0,0,0,0,0};
+	int i=0,n=0,len=1;
+	switch(*trim(&p)) {
 		case '+':
 			return DecodePlus(p);
 		case '-':
@@ -122,38 +118,52 @@ FRESULT _CLI::Decode(char *c) {
 			return DecodeEq(p);
 		case '@':
 			return Batch(++p);
+	}		
+	while (p[i]) {
+		while(p[i] && p[i]==' ')
+			p[i++]=0;
+		if(p[i])
+			sc[n++]=&p[i];
+		while(p[i]!=' ' && p[i])
+			++i;
 	}
+	if(!sc[0])
+		return FR_OK;
+	len=strlen(sc[0]);
 //_________________________________________________________________________________
-	if(!(strcmp("0:",p) && strcmp("1:",p))) {
-		if(FRESULT err=f_mount(&fatfs,p,1))
+	if(!(strncmp("0:",sc[0],len) && strncmp("1:",sc[0],len))) {
+		if(FRESULT err=f_mount(&fatfs,sc[0],1))
 			return err;
-		if(FRESULT err=f_chdrive(p))
+		if(FRESULT err=f_chdrive(sc[0]))
 			return err;
 		if(FRESULT err=f_getcwd(lfn,_MAX_LFN))
 			return err;
 	}
 //__change directory_______________________________________________________________
 	else 
-	if(!strncmp("cdir",p,strlen(p))) {
-		if(!c)
+//_________________________________________________________________________________
+	if(!strncmp("cdir",sc[0],len)) {
+		if(n < 2)
 			return FR_NO_FILE;
-
-		if(FRESULT err=f_chdir(c))
+		for(int i=1; i<n-1; ++i) {
+			*strchr(sc[i],0)=' ';
+		}
+		if(FRESULT err=f_chdir(sc[1]))
 			return err;
 		f_getcwd(cwd,_MAX_LFN);
 	}
-//__eject drive____________________________________________________________________
-	else if(!strncmp("eject",p,strlen(p))) {
-		if(!c)
+//_________________________________________________________________________________
+	else if(!strncmp("eject",sc[0],len)) {
+		if(n < 2)
 			return FR_DISK_ERR;
-		if(FRESULT err=f_mount(NULL,p,1))
+		if(FRESULT err=f_mount(NULL,sc[0],1))
 			return err;
 	}
 //__list directory_________________________________________________________________
-	else if(!strncmp("directory",p,strlen(p))) {
-		if(!c)
-			c=(char *)"*";
-		if(FRESULT err=f_findfirst(&dir,&fno,lfn,c))
+	else if(!strncmp("directory",sc[0],len)) {
+		if(n==1)
+			sc[1]=(char *)"*";
+		if(FRESULT err=f_findfirst(&dir,&fno,lfn,sc[1]))
 			return err;	
 		do {
 			_print("\r\n%-32s",fno.fname);
@@ -168,10 +178,10 @@ FRESULT _CLI::Decode(char *c) {
 		return FR_OK;
 	}
 //__delete files___________________________________________________________________
-	else if(!strncmp("delete",p,strlen(p))) {
-		if(!c)
-			c=(char *)"*";
-		if(FRESULT err=f_findfirst(&dir,&fno,lfn,c))
+	else if(!strncmp("delete",sc[0],len)) {
+		if(n==1)
+			sc[1]=(char *)"*";
+		if(FRESULT err=f_findfirst(&dir,&fno,lfn,sc[1]))
 			return err;	
 		do {
 			if(FRESULT err=f_unlink(fno.fname))
@@ -182,66 +192,61 @@ FRESULT _CLI::Decode(char *c) {
 		return FR_OK;
 	}
 //__rename file____________________________________________________________________
-	else if(!strncmp("rename",p,strlen(p))) {
-		if(!c)
+	else if(!strncmp("rename",sc[0],len)) {
+		if(n < 3)
 			return FR_NO_FILE;
-		p=c; 
-		c=strchr(c,' '); 
-		if(!c)
-			return FR_NO_FILE;
-		c=trim(&c);
-			
-		if(FRESULT err=f_rename(p,c))
+		if(FRESULT err=f_rename(sc[1],sc[2]))
 			return err;	
 	}
 //__type file______________________________________________________________________
-	else if(!strncmp("type",p,strlen(p))) {
-	if(!c)
+	else if(!strncmp("type",sc[0],len)) {
+		if(n < 2)
+
 		return FR_NO_FILE;
-		FIL	*f=new FIL;
-		if(FRESULT err=f_open(f,c,FA_READ))
-			return err;	
-		_print("\r\n");
-		while(!f_eof(f)) 
-			_print("%c",f_getc((FILE *)f));
-		f_close(f);
-		delete f;
+		else {
+			FIL	*f=new FIL;
+			if(FRESULT err=f_open(f,sc[1],FA_READ))
+				return err;	
+			_print("\r\n");
+			while(!f_eof(f)) 
+				_print("%c",f_getc((FILE *)f));
+			f_close(f);
+			delete f;
+		}
 	}
 //__make directory_________________________________________________________________
-	else if(!strncmp("mkdir",p,strlen(p))) {
-		if(!c)
+	else if(!strncmp("mkdir",sc[0],len)) {
+		if(n < 2)
 			return FR_NO_FILE;
-		if(FRESULT err=f_mkdir(c))
+		if(FRESULT err=f_mkdir(sc[1]))
 			return err;	
 	}
 //__copy file______________________________________________________________________
-	else if(!strncmp("copy",p,strlen(p))) {
-		if(!c)
-			return FR_NO_FILE;
-		p=c; 
-		c=strchr(c,' '); 
-
+	else if(!strncmp("copy",sc[0],len)) {
 		char f[256];
 		FIL	*f1=new FIL,
 				*f2=new FIL;
-		if(c)
-			strcpy(f,c);	
-		else {
-			p=strchr(p,':');
+		if(n == 2) {
+			p=strchr(sc[1],':');
 			if(p++) {
 				if(*p=='/')
 					++p;
 				strcpy(f,p);
 			} else
-				strcpy(f,p);
+				strcpy(f,sc[1]);
 		}
+		else
+		if(n == 3) {
+			strcpy(f,sc[2]);	
+		} else
+			return FR_NO_FILE;
 		
-		if(!strcmp(p,c))
+		if(!strcmp(sc[1],f))
 			strcat(f,"_Copy");
 	
 		if(f[strlen(f)-1]==':')
-			strcat(f,p);
-		if(f_open(f1,p,FA_READ)==FR_OK && f_open(f2,f,FA_CREATE_ALWAYS | FA_WRITE)==FR_OK) {
+			strcat(f,sc[1]);
+		if(f_open(f1,sc[1],FA_READ)==FR_OK && f_open(f2,f,FA_CREATE_ALWAYS | FA_WRITE)==FR_OK) {
 			while(!f_eof(f1))
 				if(f_putc(f_getc((FILE *)f1),f2)==EOF)
 					break;
@@ -253,13 +258,13 @@ FRESULT _CLI::Decode(char *c) {
 		return FR_OK;
 	}
 //__format flash drive_____________________________________________________________
-	else if(!strncmp("format",p,strlen(p))) {
-		FRESULT	err=ff_format(p);
+	else if(!strncmp("format",sc[0],len)) {
+		FRESULT	err=ff_format(sc[1]);
 		if(err != FR_OK)
 			return err;
 	}
 //__repack flash drive____________________________________________________________
-	else if(!strncmp("pack",p,strlen(p))) {
+	else if(!strncmp("pack",sc[0],len)) {
 		ff_pack(EOF);
 	}
 ////__dump memory contents___________________________________________________________
@@ -270,7 +275,7 @@ FRESULT _CLI::Decode(char *c) {
 //		_wait(atoi(sc[1]));
 //	}
 //__file line edit/add ___________________________________________________________
-	else if(!strncmp("file",p,strlen(p))) {
+	else if(!strncmp("file",sc[0],len)) {
 		class _ENTERFILE : public _TERM, public _FS {
 			private:
 				FIL *f;
@@ -294,7 +299,7 @@ FRESULT _CLI::Decode(char *c) {
 				virtual void Newline(void) {
 					_print("\r\n");
 				};	
-		} efile(c);
+		} efile(sc[1]);
 		
 		while(efile.Parse() && efile.err == FR_OK) {
 			_wait(2);
@@ -323,29 +328,29 @@ FRESULT _CLI::Decode(char *c) {
 //		return _PARSE_OK;						
 //	}
 //__entering new file______________________________________________________________
-	else if(!strncmp("usb",p,strlen(p))) {
-		if(!c) 
+	else if(!strncmp("usb",sc[0],len)) {
+		if(n < 2) 
 			return FR_INVALID_PARAMETER;
-		if(!strncmp("host",c,strlen(c))) {
+		if(!strncmp("host",sc[1],len)) {
 			killMsc();
 			killVcp();
 			makeHost();
-		} else if(!strncmp("filesystem",c,strlen(c))) {
+		} else if(!strncmp("filesystem",sc[1],strlen(sc[1]))) {
 			killVcp();
 			killHost();
 			makeMsc();
-		} else if(!strncmp("serial",c,strlen(c))) {
+		} else if(!strncmp("serial",sc[1],strlen(sc[1]))) {
 			killMsc();
 			killHost();
 			makeVcp();
 		} else
 				return FR_NOT_READY;
 	} else {
-		if(p)
-			_print(" %s",p);
-		if(c)
-			_print(" %s",c);
-		return FR_INVALID_NAME;
+		if(n) {
+			for(i=0; i<n; ++i)
+				_print(" %s",sc[i]);
+			return FR_INVALID_NAME;
+		}
 	}
 	return FR_OK;
 }

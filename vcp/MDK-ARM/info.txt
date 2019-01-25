@@ -1,0 +1,10 @@
+- preimenuješ Vcp_USB_DEVICE_Init v Vcp_USB_DEVICE_Init
+- preimenuješ hVcpDeviceFS v hVcpDeviceFS
+- izkljuci main
+- zakomentiraj Error_Handler
+
+	FS_Desc v VCP_Desc
+	usbd_desc.c >> vse predpone USBD_FS_ v recimo VCP_FS_
+	
+- zakomentiraj Error_handler v obeh lib... usbd_conf.c
+

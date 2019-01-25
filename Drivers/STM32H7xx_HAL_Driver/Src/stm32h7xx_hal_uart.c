@@ -2525,7 +2525,7 @@ static void UART_DMATransmitCplt(DMA_HandleTypeDef *hdma)
     /* Disable the DMA transfer for transmit request by resetting the DMAT bit
        in the UART CR3 register */
     CLEAR_BIT(huart->Instance->CR3, USART_CR3_DMAT);
-		huart->gState = HAL_UART_STATE_READY;			//bug, dodatek !!!
+
     /* Enable the UART Transmit Complete Interrupt */
     SET_BIT(huart->Instance->CR1, USART_CR1_TCIE);
   }

@@ -177,15 +177,13 @@ void 	*v=this;
 * Output				:
 * Return				:
 *******************************************************************************/
-char *_TERM::trim(char **p) {
-	char *q=NULL;
-	if(p && *p) {
-		for(q=strchr(*p,0); *p != q && *--q==' '; *q=0);
-		for(q=*p; *q==' '; *q++=0);
-		for(char *r = *p = strchr(q,' '); *r && *r==' '; *p=++r)
-			*r=NULL;
+char *_TERM::trim(char **c) {
+	char *cc=NULL;
+	if(c && *c) {
+		for(cc=strchr(*c,0); *c != cc && *--cc==' '; *cc=0);
+		for(cc=*c; *cc==' '; *cc++=0);
 	}
-	return q;
+	return cc;
 }
 /*******************************************************************************
 * Function Name : 

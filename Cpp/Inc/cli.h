@@ -45,18 +45,18 @@ class _CLI : public _TERM, public _FS {
 			UART_HandleTypeDef *h=(UART_HandleTypeDef *)io->huart;
 			int idx=((DMA_Stream_TypeDef   *)h->hdmarx->Instance)->NDTR;
 
-			io->rx->_push = (char *)&h->pRxBuffPtr[h->RxXferSize - idx];	
-			if(h->gState == HAL_UART_STATE_READY) {
-				int len;
-				if(!h->pTxBuffPtr)
-					h->pTxBuffPtr=(uint8_t *)malloc(io->tx->size);
-				do {
-					len=_buffer_pull(io->tx, h->pTxBuffPtr, io->tx->size);
-					if(len)
-						HAL_UART_Transmit_DMA(h, h->pTxBuffPtr, len);
-				} while(len > 0);
+				io->rx->_push = (char *)&h->pRxBuffPtr[h->RxXferSize - idx];	
+				if(h->gState == HAL_UART_STATE_READY) {
+					int len;
+					if(!h->pTxBuffPtr)
+						h->pTxBuffPtr=(uint8_t *)malloc(io->tx->size);
+					do {
+						len=_buffer_pull(io->tx, h->pTxBuffPtr, io->tx->size);
+						if(len)
+							HAL_UART_Transmit_DMA(h, h->pTxBuffPtr, len);
+					} while(len > 0);
+				}
 			}
-		}
 
 		_io* ioUsart(UART_HandleTypeDef *huart, int sizeRx, int sizeTx) {
 			_io* io=_io_init(sizeRx,sizeTx);
