@@ -54,7 +54,7 @@
           <CreateHexFile>0</CreateHexFile>
           <DebugInformation>1</DebugInformation>
           <BrowseInformation>1</BrowseInformation>
-          <ListingPath></ListingPath>
+          <ListingPath>.\list\</ListingPath>
           <HexFormatSelection>1</HexFormatSelection>
           <Merge32K>0</Merge32K>
           <CreateBatchFile>0</CreateBatchFile>
@@ -171,7 +171,7 @@
             <AdsLsun>1</AdsLsun>
             <AdsLven>1</AdsLven>
             <AdsLsxf>1</AdsLsxf>
-            <RvctClst>0</RvctClst>
+            <RvctClst>1</RvctClst>
             <GenPPlst>0</GenPPlst>
             <AdsCpuType>"Cortex-M7"</AdsCpuType>
             <RvctDeviceName></RvctDeviceName>
@@ -335,7 +335,7 @@
               <MiscControls>--exceptions</MiscControls>
               <Define>USE_HAL_DRIVER,STM32H743xx</Define>
               <Undefine></Undefine>
-              <IncludePath>../Inc;        ../Drivers/STM32H7xx_HAL_Driver/Inc;        ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;        ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc;        ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc;        ../Drivers/CMSIS/Device/ST/STM32H7xx/Include;        ../Middlewares/Third_Party/FatFs/src;        ../Drivers/CMSIS/Include;        ..\C\Inc;        ..\Cpp\Inc</IncludePath>
+              <IncludePath>../Inc;            ../Drivers/STM32H7xx_HAL_Driver/Inc;            ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy;            ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc;            ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc;            ../Drivers/CMSIS/Device/ST/STM32H7xx/Include;            ../Middlewares/Third_Party/FatFs/src;            ../Drivers/CMSIS/Include;            ..\C\Inc;            ..\Cpp\Inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -693,6 +693,16 @@
               <FileName>info.txt</FileName>
               <FileType>5</FileType>
               <FilePath>.\info.txt</FilePath>
+            </File>
+            <File>
+              <FileName>tetris.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\C\tetris\tetris.c</FilePath>
+            </File>
+            <File>
+              <FileName>lzss.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\C\zip\lzss.c</FilePath>
             </File>
           </Files>
         </Group>

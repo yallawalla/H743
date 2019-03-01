@@ -6,6 +6,13 @@
 #include "proc.h"
 #include "limits.h"
 
+extern "C" {
+FRESULT	ff_format(char *);
+int			ff_pack(int);
+void		ff_query(void);
+void		tetris_run(int, int);
+}
+
 class _FS {
 	public:	
 		FATFS fatfs;
@@ -44,25 +51,30 @@ class _CLI : public _TERM, public _FS {
 		static void	pollUsart(_io *io) {
 			UART_HandleTypeDef *h=(UART_HandleTypeDef *)io->huart;
 			int idx=((DMA_Stream_TypeDef   *)h->hdmarx->Instance)->NDTR;
+			
+			SCB_InvalidateDCache_by_Addr((uint32_t *)h->pRxBuffPtr,io->rx->size);
 
-				io->rx->_push = (char *)&h->pRxBuffPtr[h->RxXferSize - idx];	
-				if(h->gState == HAL_UART_STATE_READY) {
-					int len;
-					if(!h->pTxBuffPtr)
-						h->pTxBuffPtr=(uint8_t *)malloc(io->tx->size);
-					do {
-						len=_buffer_pull(io->tx, h->pTxBuffPtr, io->tx->size);
-						if(len)
-							HAL_UART_Transmit_DMA(h, h->pTxBuffPtr, len);
-					} while(len > 0);
-				}
+			io->rx->_push = (char *)&h->pRxBuffPtr[h->RxXferSize - idx];	
+			
+			if(h->gState == HAL_UART_STATE_READY) {
+				int len;
+				if(!h->pTxBuffPtr)
+					h->pTxBuffPtr=(uint8_t *)malloc(io->tx->size);
+				do {
+					len=_buffer_pull(io->tx, h->pTxBuffPtr, io->tx->size);
+					if(len) {
+						SCB_CleanDCache_by_Addr((uint32_t *)h->pTxBuffPtr, io->tx->size);
+						HAL_UART_Transmit_DMA(h, h->pTxBuffPtr, len);
+					}
+				} while(len > 0);
 			}
+		}
 
 		_io* ioUsart(UART_HandleTypeDef *huart, int sizeRx, int sizeTx) {
 			_io* io=_io_init(sizeRx,sizeTx);
 			if(io && huart) {
 				io->huart=huart;
-			HAL_UART_Receive_DMA(huart,(uint8_t*)io->rx->_buf,io->tx->size);
+				HAL_UART_Receive_DMA(huart,(uint8_t*)io->rx->_buf,io->rx->size);
 				_proc_add((void *)pollUsart,io,(char *)"uart",0);
 			}
 			return io;

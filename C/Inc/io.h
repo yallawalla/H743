@@ -18,7 +18,7 @@ extern uint32_t	__time__;
 //______________________________________________________________________________________
 typedef struct _buffer
 {
-	char	*_buf,
+	char	*_buf,*_buf0,
 				*_push,
 				*_pull;
 	int		size;

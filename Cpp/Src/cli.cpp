@@ -6,10 +6,8 @@ void	makeHost(void),
 			killHost(void),
 			killMsc(void),
 			killVcp(void);
-}
-extern "C" {
-FRESULT	ff_format(char *);
-int			ff_pack(int);
+			short zip(char *, char *);
+			short unzip(char *, char *);
 }
 //_________________________________________________________________________________
 void	_CLI::Newline(void) {
@@ -28,6 +26,10 @@ int _CLI::Fkey(int t) {
 		switch(t) {
 			case __CtrlE:
 			break;
+			case __CtrlT:
+				tetris_run(20,30);
+			break;
+			
 			case __f4:
 			case __F4:
 				return __F12;
@@ -98,6 +100,9 @@ FRESULT _CLI::DecodeEq(char *c) {
 //_________________________________________________________________________________
 FRESULT _CLI::DecodeInq(char *c) {
 	switch(*trim(&++c)) {
+		case 's':
+			ff_query();
+		break;
 		default:
 			return FR_INVALID_NAME;
 	} 	
@@ -265,7 +270,7 @@ FRESULT _CLI::Decode(char *p) {
 	}
 //__repack flash drive____________________________________________________________
 	else if(!strncmp("pack",sc[0],len)) {
-		ff_pack(EOF);
+		ff_pack(atoi(sc[1]));
 	}
 ////__dump memory contents___________________________________________________________
 //	else if(!strncmp("dump",sc[0],len)) {
@@ -345,7 +350,17 @@ FRESULT _CLI::Decode(char *p) {
 			makeVcp();
 		} else
 				return FR_NOT_READY;
-	} else {
+	} 
+	else if(!strncmp("zip",sc[0],len)) {
+		if(n < 3) 
+			return FR_INVALID_PARAMETER;
+		return (FRESULT) zip(sc[1],sc[2]);
+	}
+	else if(!strncmp("unzip",sc[0],len)) {
+		if(n < 3) 
+			return FR_INVALID_PARAMETER;
+		return (FRESULT) unzip(sc[1],sc[2]);
+	}	else {
 		if(n) {
 			for(i=0; i<n; ++i)
 				_print(" %s",sc[i]);
@@ -381,4 +396,4 @@ void	_CLI::date_time(uint32_t d,uint32_t t) {
 //		HAL_RTC_GetDate(&hrtc,&d,RTC_FORMAT_BIN);
 //		_print("%4s,%3d-%3s-%d,%3d:%02d:%02d",days[d.WeekDay-1].c_str(),d.Date,months[d.Month-1].c_str(),d.Year,t.Hours,t.Minutes,t.Seconds);
 //}
-
+/*-----------------------------------------------------------------------*/

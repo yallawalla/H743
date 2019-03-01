@@ -1,0 +1,6 @@
+..\C\Src\io.c -E --c99 -c --cpu Cortex-M7.fp.dp -g -O3 --apcs=interwork --split_sections -I ../Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc -I ../Drivers/STM32H7xx_HAL_Driver/Inc/Legacy -I ../Middlewares/ST/STM32_USB_Host_Library/Core/Inc -I ../Middlewares/ST/STM32_USB_Host_Library/Class/MSC/Inc -I ../Drivers/CMSIS/Device/ST/STM32H7xx/Include -I ../Middlewares/Third_Party/FatFs/src -I ../Drivers/CMSIS/Include -I ..\C\Inc -I ..\Cpp\Inc --exceptions
+-I.\RTE\_yyy
+-IC:\Keil_v5\ARM\PACK\ARM\CMSIS\5.4.0\CMSIS\Core\Include
+-IC:\Keil_v5\ARM\PACK\Keil\STM32H7xx_DFP\2.1.0\Drivers\CMSIS\Device\ST\STM32H7xx\Include
+-D__UVISION_VERSION="523" -D_RTE_ -DSTM32H743xx -DUSE_HAL_DRIVER -DSTM32H743xx
+-o io.i --list_dir --list

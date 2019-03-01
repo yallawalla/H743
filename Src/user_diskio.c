@@ -66,23 +66,25 @@
 /* Includes ------------------------------------------------------------------*/
 #include <string.h>
 #include <stdio.h>
+#include "io.h"
+#include "proc.h"
 #include "ff_gen_drv.h"
 
 /* Private typedef -----------------------------------------------------------*/
 /* Private define ------------------------------------------------------------*/
-#define 	FATFS_SECTOR	FLASH_SECTOR_6
+#define 	FATFS_SECTOR	FLASH_SECTOR_0
 #define		FATFS_ADDRESS 0x8100000
 #define		PAGE_SIZE			0x0020000
-#define		PAGE_COUNT		8
+#define		PAGE_COUNT		7
 #define		SECTOR_SIZE		512
 #define		CLUSTER_SIZE	4*SECTOR_SIZE
 #define		SECTOR_COUNT	(int)(PAGE_SIZE*PAGE_COUNT/(SECTOR_SIZE + 32*sizeof(uint8_t)))
 #define		_FFB					0xff
 
 struct clust {
-	uint8_t 	data[SECTOR_SIZE];
-	int32_t		idx;
-	uint8_t 	dummy[32-sizeof(uint32_t)];
+		uint8_t 	data[SECTOR_SIZE];
+		int32_t		idx;
+		uint8_t 	dummy[32-sizeof(uint32_t)];
 } *clust=(struct clust *)FATFS_ADDRESS;
 /*******************************************************************************
 * Function Name	: 
@@ -94,70 +96,61 @@ HAL_StatusTypeDef	FLASH_Erase(uint32_t sector, uint32_t n) {
 FLASH_EraseInitTypeDef EraseInitStruct;
 HAL_StatusTypeDef ret;
 uint32_t	SectorError;
-	HAL_FLASH_Unlock();
-  EraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
-	EraseInitStruct.Banks=FLASH_BANK_2;
-  EraseInitStruct.VoltageRange = FLASH_VOLTAGE_RANGE_3;
-  EraseInitStruct.Sector = sector;
-  EraseInitStruct.NbSectors = n;
-  ret=HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError);
-  HAL_FLASH_Lock(); 
-	return ret;
+		HAL_FLASH_Unlock();
+		EraseInitStruct.TypeErase = FLASH_TYPEERASE_SECTORS;
+		EraseInitStruct.Banks=FLASH_BANK_2;
+		EraseInitStruct.VoltageRange = FLASH_VOLTAGE_RANGE_3;
+		EraseInitStruct.Sector = sector;
+		EraseInitStruct.NbSectors = n;
+		ret=HAL_FLASHEx_Erase(&EraseInitStruct, &SectorError);
+		HAL_FLASH_Lock(); 
+		return ret;
 }
 /*******************************************************************************
 * Function Name	: ff_pack
-* Description		: packing flash dile system sectors
-* Input					: mode flag, 0-analyze, 1-rewrite
+* Description		: packing flash file system sectors
+* Input					: 
 * Output				: 
-* Return				: percentage of number of sectors reduced
+* Return				: 
 *******************************************************************************/
-int		ff_pack(int mode) {
-int 	i,f,e,*p,*q,buf[SECTOR_SIZE/4];
-int		c0=0,c1=0;
-
-//			Watchdog_init(4000);
-			f=FATFS_SECTOR;																															// f=koda prvega 128k sektorja
-			e=PAGE_SIZE;																																// e=velikost sektorja
-			p=(int *)FATFS_ADDRESS;																											// p=hw adresa sektorja
+int	ff_pack(int mode) {
+		int a=0,b=0;
+		struct clust *p;
+		uint8_t buf[SECTOR_SIZE];
+		uint32_t e=FATFS_ADDRESS + PAGE_SIZE, f=FATFS_SECTOR;
+		p=(struct clust *)FATFS_ADDRESS;
+		do {
 			do {
-				do {
-					++c0;
-//					Watchdog();																															//jk822iohfw
-					q=&p[SECTOR_SIZE/4+1];																									
-					while(p[SECTOR_SIZE/4] != q[SECTOR_SIZE/4] && q[SECTOR_SIZE/4] != -1)		// iskanje ze prepisanih sektorjev
-						q=&q[SECTOR_SIZE/4+1];
-					if(q[SECTOR_SIZE/4] == -1) {																						// ce ni kopija, se ga prepise na konec fs
-						for(i=0; i<SECTOR_SIZE/4;++i)
-							buf[i]=~p[i];
-//						Watchdog();
-						if(mode)
-							disk_write (0,(uint8_t *)buf,p[SECTOR_SIZE/4],1);										// STORAGE_Write bo po prvem brisanju zacel na
-					} else																																	// zacetku !!!
-						++c1;
-					p=&p[SECTOR_SIZE/4+1]; 
-				} while(((int)p)-FATFS_ADDRESS <  e && p[SECTOR_SIZE/4] != -1);						// prepisana cela stran...
-				if(mode) {
-					putchar('.');
-//					_wait(2);
-					FLASH_Erase(f,1);																												// brisi !
-				}
-				f+=FLASH_SECTOR_1; 
-				e+=PAGE_SIZE;
-			} while(p[SECTOR_SIZE/4] != -1);	
-			if(mode) {
-				puts(". OK");
-//				_wait(2);
-				FLASH_Erase(f,1);																													// se zadnja !
-				return 0;
-			} else 
-				return(100*c1/c0);
+				struct clust *q=p;
+				while(p->idx != (++q)->idx && q->idx != EOF);
+				if(q->idx == EOF) {
+					for(int i=0; i<SECTOR_SIZE; ++i)
+						buf[i]=~p->data[i];
+					if(mode)
+						disk_write (1,buf,p->idx,1);	
+					if(f != FATFS_SECTOR || !mode)
+						++b;
+				} else
+					++a;
+			} while (++p <  (struct clust *)e && p->idx != EOF);	
+			if(mode)
+				FLASH_Erase(f,1);
+			printf(".");
+			_wait(2);
+			f+=FLASH_SECTOR_1; 
+			e+=PAGE_SIZE;
+		} while (p->idx != EOF);
+		if(mode)
+			FLASH_Erase(f,1);
+		printf("%d/%d%c",(100*a)/b,(100*b)/SECTOR_COUNT,'%');
+		return (100*a)/b;
 }
 /*******************************************************************************
-* Function Name	: ff_pack
-* Description		: packing flash dile system sectors
-* Input					: mode flag, 0-analyze, 1-rewrite
+* Function Name	: ff_format
+* Description		: formatting flash file system sectors
+* Input					: 
 * Output				: 
-* Return				: percentage of number of sectors reduced
+* Return				: 
 *******************************************************************************/
 FRESULT	ff_format(char *drv) {
 //			FATFS f;
@@ -174,6 +167,45 @@ FRESULT	ff_format(char *drv) {
 		free(wbuf);
 		return err;
 	}
+/*******************************************************************************
+* Function Name	: ff_query
+* Description		: monitor flash file system status
+* Input					: 
+* Output				: 
+* Return				: 
+*******************************************************************************/
+void		ff_query(void) {
+int			i,j;
+struct	clust	*p=(struct clust *)FATFS_ADDRESS,*q;
+	
+			for(i=0; i<SECTOR_COUNT; ++i) {
+				if(!((i%255)%16))
+					_print("\r\n");
+				if(!(i%255))
+					_print("\r\n");		
+				if(p->idx == -1)
+					_print(" --- ");
+				else {
+					q=p;
+					j=i;
+					while(++j<SECTOR_COUNT && p->idx != (++q)->idx);
+					if(j==SECTOR_COUNT)
+						_print("%04X ",p->idx);
+					else
+						_print("%04X%c",p->idx,'*');
+				}
+				++p;
+			}
+}
+/* ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------------*/
+/* ---------------------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Disk status */
 static volatile DSTATUS Stat = STA_NOINIT;

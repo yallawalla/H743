@@ -13,7 +13,9 @@
 */
 #include 	"io.h"
 #include	"ff.h"
-//_________________________________________________________________________________
+//
+//
+//______________________________________________________________________________________
 _io			*_stdio(_io	*p) {
 _io			*io=stdin->io;
 				stdin->io=stdout->io=p;
@@ -28,11 +30,13 @@ _io			*io=stdin->io;
 //______________________________________________________________________________________
 // buffer initialization
 //
+//
 _buffer	*_buffer_init(int length) {
 				if(length>0) {
 					_buffer	*p=calloc(1,sizeof(_buffer));
 					if(p) {
-						p->_buf=p->_push=p->_pull=calloc(length,sizeof(char));
+						p->_buf0=calloc(length+32,sizeof(char));
+						p->_buf=p->_push=p->_pull=(char *)(((int)p->_buf0 & ~31) + 32);
 						p->size=length;
 						if(p->_buf)
 							return(p);
@@ -45,7 +49,7 @@ _buffer	*_buffer_init(int length) {
 //______________________________________________________________________________________
 _buffer	*_buffer_close(_buffer	*p) {
 				if(p) {
-					free(p->_buf);
+					free(p->_buf0);
 					free(p);
 				}
 				return NULL;
